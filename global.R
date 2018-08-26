@@ -3,9 +3,29 @@
 # nicehash API build
 library(httr)
 library(dplyr)
+library(ggplot2)
+library(zoo)
+library(googlesheets)
+library(fontawesome)
+
+
+# Nicehash API wrappers start here
 
 addr <- "3EhPgAwWq9n6KpQV23vXbvxrarAPphNyey"
 niceApi <- "https://api.nicehash.com/api"
+
+niceHashWrapper <- function(addr, func){
+  apiGet <- GET(niceApi,path = list("api"),query= list(method = func, addr = addr))
+  warn_for_status(apiGet)
+  print(apiGet$url)
+  responseList <- content(apiGet,type = "application/json")
+  return(responseList)
+}
+
+# tests
+# niceHashWrapper(addr, "stats.provider")
+# niceHashWrapper(addr, "stats.provider.workers")
+
 
 algoTable <- data_frame( algo = 0:33, algoName = c("Scrypt",
                                                    "SHA256",
@@ -58,3 +78,41 @@ extractStatsNH <- function(responseList){
     left_join(., algoTable)
   return(responseDF)
 }
+
+# test<- niceHashWrapper(addr, "stats.provider")
+# extractStatsNH(test)
+
+#NANOPOOL API WRAPPERS START HERE
+
+ethAddr <- "0x6700484b8751c701794b92d9ca04406853f085c4"
+nanopoolApi <- "http://api.nanopool.org/v1/"
+coin = "eth"
+func= "user"
+
+nanopoolWrapper <- function(addr,coin="eth",func){
+  get_response <- GET(nanopoolApi,path = list("v1",coin,func,addr))
+  warn_for_status(get_response)
+  print(get_response$url)
+  return(content(get_response))
+}
+
+# Google sheets starts here bro
+
+readRDS("googlesheets_token.rds")
+
+saveDataGs <- function(data, table) {
+  # Grab the Google Sheet
+  sheet <- gs_title(table)
+  # Add the data as a new row
+  gs_add_row(sheet, input = data)
+}
+
+loadDataGs <- function(data,table) {
+  # Grab the Google Sheet
+  sheet <- gs_title(table)
+  # Read the data
+  gs_read_csv(sheet)
+}
+
+
+ 

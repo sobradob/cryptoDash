@@ -13,10 +13,35 @@ library(shinydashboard)
 
 dashboardPage(
   dashboardHeader(title = "CryptoDash"),
-  dashboardSidebar(),
+  dashboardSidebar(
+    sidebarMenu(id = "tabs",
+                menuItem("Nanopool",tabName = "nanopool", icon = tags$i(fa("tachometer-alt",fill = "white"))),
+                menuItem("NiceHash",tabName = "nicehash", icon = tags$i(fa("tachometer-alt",fill = "white"))))
+  ),
   dashboardBody(
-    fluidRow(
-    box(tableOutput("view"))
+    tabItems(
+      tabItem("nicehash",
+              box(tableOutput("view"))
+      ),
+      tabItem("nanopool",
+              div(p("Nanopool Dashboard")),
+              fluidRow(
+                # A static infoBox
+                infoBoxOutput("nanopoolWorkerCount"),
+                # Dynamic infoBoxes
+                infoBoxOutput("nanopoolHR"),
+                infoBox("Total Watt", 10 * 2, icon = tags$i(fa("battery-full", fill = "white")))
+                ),
+              fluidRow(
+                infoBoxOutput("nanopoolETHEUR"),
+                infoBoxOutput("PerDay"),
+                infoBox("Total Profit", 9001, icon = tags$i(fa("ethereum", fill = "white")))
+                ),
+              fluidRow(
+                plotOutput("hrHistory")
+                )
+              )
     )
+    
     )
 )
